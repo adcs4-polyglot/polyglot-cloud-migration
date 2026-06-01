@@ -1,35 +1,12 @@
-version: '3'
+FROM python:3.11-slim
+WORKDIR /app
 
-services:
-  server:
-    build: ./project
-    image: master-image
-    ports:
-      - 5000:5000
-    command: gunicorn --workers 4 --bind 0.0.0.0:5000 --timeout 120 'server:create_app()'
-    stdin_open: true
-    tty: true
+COPY project/requirements.txt .
 
-  worker:
-    image: master-image
-    depends_on:
-      - redis
-    command: rq worker --name worker --url redis://redis:6379/0
+RUN pip install --no-cache-dir -r requirements.txt
 
-# uncomment to have a another worker
-#  worker2:
-#    image: master-image
-#    depends_on:
-#      - redis
-#    command: rqworker --name worker2 --url redis://redis:6379/0
+COPY . .
 
-  dashboard:
-    image: master-image
-    ports:
-      - 5555:5555
-    depends_on:
-      - redis
-    command: rq-dashboard --port 5555 --redis-url redis://redis:6379/0
+EXPOSE 5001
 
-  redis:
-    image: redis
+CMD ["python", "-c", "from rq import Worker, Queue, Connection; from redis import Redis; conn = Redis.from_url('redis://redis:6379'); w = Worker(Queue(connection=conn), connection=conn); w.work()"]

@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 5001
 
-CMD ["python", "-m", "rq", "worker", "--url", "redis://redis:6379"]
+CMD ["python", "-c", "from rq import Worker, Queue, Connection; from redis import Redis; conn = Redis.from_url(\"redis://redis:6379\"); w = Worker([Queue(connection=conn)], connection=conn); w.work()"]
