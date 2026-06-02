@@ -1,0 +1,8 @@
+subscription_id     = "your-subscription-id-here"
+client_id           = "your-client-id-here"
+client_secret       = "your-client-secret-here"
+tenant_id           = "your-tenant-id-here"
+location            = "East US"
+resource_group_name = "polyglot-rg"
+vm_size             = "Standard_B1s"
+admin_username      = "azureuser"
