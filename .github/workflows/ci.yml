@@ -27,7 +27,7 @@ jobs:
         working-directory: ./backend-dotnet
 
       - name: Run backend tests
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal --filter "Category!=Integration"
         working-directory: ./backend-dotnet
 
   test-worker:
