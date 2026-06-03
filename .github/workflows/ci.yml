@@ -30,6 +30,11 @@ jobs:
         run: dotnet test --no-build --verbosity normal --filter "Category!=Integration"
         working-directory: ./backend-dotnet
 
+      - name: Lint backend
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+        working-directory: ./backend-dotnet
+        continue-on-error: true
+
   test-worker:
     runs-on: ubuntu-latest
     steps:
@@ -42,19 +47,48 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r project/requirements.txt pytest
+        run: pip install -r project/requirements.txt pytest ruff
         working-directory: ./worker-python
 
       - name: Run Python syntax check
         run: python -m py_compile project/server/__init__.py
         working-directory: ./worker-python
 
+      - name: Lint Python with ruff
+        run: ruff check .
+        working-directory: ./worker-python
+        continue-on-error: true
+
       - name: Worker test passed
         run: echo "Worker syntax check passed successfully"
 
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend-js
+
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: ./frontend-js
+        continue-on-error: true
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./frontend-js
+
   build-images:
     runs-on: ubuntu-latest
-    needs: [test-backend, test-worker]
+    needs: [test-backend, test-worker, test-frontend]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
